@@ -1,13 +1,8 @@
 pipeline {
     agent any
 
-    tools {
-        // Nom exact configuré dans Manage Jenkins > Tools > SonarQube Scanner
-        scanner 'sonar-scanner'
-    }
-
     environment {
-        // Remplacez par la clé de votre projet dans SonarQube
+        // Clé de votre projet dans SonarQube
         SONAR_PROJECT_KEY = 'mon-projet-cle'
     }
 
@@ -20,8 +15,8 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                // Adaptez cette commande à votre projet (ex: ./mvnw test, npm test, pytest...)
-                sh 'echo "Compilation et tests unitaires..."'
+                // Utilisez ./mvnw si le Maven Wrapper est présent dans le dépôt, sinon mvn
+                sh 'mvn clean verify'
             }
         }
 
@@ -29,19 +24,19 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonarqube-server') {
                     script {
-                        def prOptions = ""
+                        def prArgs = ""
                         if (env.CHANGE_ID) {
-                            prOptions = """
+                            prArgs = """
                                 -Dsonar.pullrequest.key=${env.CHANGE_ID} \
                                 -Dsonar.pullrequest.branch=${env.CHANGE_BRANCH} \
                                 -Dsonar.pullrequest.base=${env.CHANGE_TARGET}
                             """
                         }
                         sh """
-                            ${tool('scanner')}/bin/sonar-scanner \
+                            mvn sonar:sonar \
                               -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                               -Dsonar.projectVersion=${BUILD_NUMBER} \
-                              ${prOptions}
+                              ${prArgs}
                         """
                     }
                 }
@@ -53,9 +48,7 @@ pipeline {
 
         stage('Checkmarx Scan') {
             steps {
-                // Remplacez ce bloc par la syntaxe générée dans Jenkins :
-                // Ouvrez un job Pipeline > Pipeline Syntax > choisissez l'étape Checkmarx,
-                // configurez votre projet/seuils, cliquez sur "Generate Pipeline Script" et collez ici.
+                // Remplacez ce bloc par la syntaxe générée via "Pipeline Syntax" dans Jenkins
                 sh 'echo "Exécution du scan Checkmarx (coller le bloc généré via Pipeline Syntax)"'
             }
         }
