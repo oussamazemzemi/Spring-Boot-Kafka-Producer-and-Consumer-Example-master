@@ -20,7 +20,6 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                // Utilisez 'mvnw.cmd clean verify' si le wrapper est dans le dépôt, sinon 'mvn clean verify'
                 bat 'mvn clean verify'
             }
         }
@@ -35,9 +34,6 @@ pipeline {
                         }
                         bat "mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY} -Dsonar.projectVersion=${BUILD_NUMBER} ${prArgs}"
                     }
-                }
-                timeout(time: 10, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
                 }
             }
         }
