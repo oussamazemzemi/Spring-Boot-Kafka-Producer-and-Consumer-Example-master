@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        // Remplacez 'maven-3' par le Name exact saisi dans Manage Jenkins > Tools
+        maven 'maven-3'
+    }
+
     environment {
         // Remplacez par la clé exacte de votre projet dans SonarQube
         SONAR_PROJECT_KEY = 'Spring-Boot-Kafka-Example'
