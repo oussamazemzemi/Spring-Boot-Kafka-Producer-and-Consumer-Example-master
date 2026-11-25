@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Clé de votre projet dans SonarQube
+        // Remplacez par la clé exacte de votre projet dans SonarQube
         SONAR_PROJECT_KEY = 'Spring-Boot-Kafka-Example'
     }
 
@@ -15,8 +15,8 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                // Utilisez ./mvnw si le Maven Wrapper est présent dans le dépôt, sinon mvn
-                sh 'mvn clean verify'
+                // Utilisez 'mvnw.cmd clean verify' si le wrapper est dans le dépôt, sinon 'mvn clean verify'
+                bat 'mvn clean verify'
             }
         }
 
@@ -26,18 +26,9 @@ pipeline {
                     script {
                         def prArgs = ""
                         if (env.CHANGE_ID) {
-                            prArgs = """
-                                -Dsonar.pullrequest.key=${env.CHANGE_ID} \
-                                -Dsonar.pullrequest.branch=${env.CHANGE_BRANCH} \
-                                -Dsonar.pullrequest.base=${env.CHANGE_TARGET}
-                            """
+                            prArgs = "-Dsonar.pullrequest.key=${env.CHANGE_ID} -Dsonar.pullrequest.branch=${env.CHANGE_BRANCH} -Dsonar.pullrequest.base=${env.CHANGE_TARGET}"
                         }
-                        sh """
-                            mvn sonar:sonar \
-                              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                              -Dsonar.projectVersion=${BUILD_NUMBER} \
-                              ${prArgs}
-                        """
+                        bat "mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY} -Dsonar.projectVersion=${BUILD_NUMBER} ${prArgs}"
                     }
                 }
                 timeout(time: 10, unit: 'MINUTES') {
@@ -45,13 +36,6 @@ pipeline {
                 }
             }
         }
-
-        //stage('Checkmarx Scan') {
-          //  steps {
-                // Remplacez ce bloc par la syntaxe générée via "Pipeline Syntax" dans Jenkins
-            //    sh 'echo "Exécution du scan Checkmarx (coller le bloc généré via Pipeline Syntax)"'
-            //}
-        //}
     }
 
     post {
