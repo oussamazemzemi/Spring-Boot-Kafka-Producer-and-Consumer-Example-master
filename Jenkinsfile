@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Clé de votre projet dans SonarQube
-        SONAR_PROJECT_KEY = 'mon-projet-cle'
+        SONAR_PROJECT_KEY = 'Spring-Boot-Kafka-Example'
     }
 
     stages {
@@ -46,12 +46,12 @@ pipeline {
             }
         }
 
-        stage('Checkmarx Scan') {
-            steps {
+        //stage('Checkmarx Scan') {
+          //  steps {
                 // Remplacez ce bloc par la syntaxe générée via "Pipeline Syntax" dans Jenkins
-                sh 'echo "Exécution du scan Checkmarx (coller le bloc généré via Pipeline Syntax)"'
-            }
-        }
+            //    sh 'echo "Exécution du scan Checkmarx (coller le bloc généré via Pipeline Syntax)"'
+            //}
+        //}
     }
 
     post {
