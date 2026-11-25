@@ -2,12 +2,10 @@ pipeline {
     agent any
 
     tools {
-        // Remplacez 'maven-3' par le Name exact saisi dans Manage Jenkins > Tools
         maven 'maven-3'
     }
 
     environment {
-        // Remplacez par la clé exacte de votre projet dans SonarQube
         SONAR_PROJECT_KEY = 'Spring-Boot-Kafka-Example'
     }
 
@@ -21,6 +19,20 @@ pipeline {
         stage('Build & Test') {
             steps {
                 bat 'mvn clean verify'
+            }
+        }
+
+        stage('OWASP Dependency-Check') {
+            steps {
+                withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
+                    script {
+                        def cleanKey = env.NVD_API_KEY ? env.NVD_API_KEY.trim() : ''
+                        if (!cleanKey) {
+                            error("Le credential 'nvd-api-key' est vide.")
+                        }
+                        bat "mvn org.owasp:dependency-check-maven:13.0.0:check -DnvdApiKey=${cleanKey} -DassemblyAnalyzerEnabled=false -DfailBuildOnCVSS=8"
+                    }
+                }
             }
         }
 
@@ -41,6 +53,7 @@ pipeline {
 
     post {
         always {
+            archiveArtifacts artifacts: 'target/dependency-check-report.*', allowEmptyArchive: true
             cleanWs()
         }
     }
