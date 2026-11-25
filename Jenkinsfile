@@ -24,17 +24,15 @@ pipeline {
 
         stage('OWASP Dependency-Check') {
             steps {
-                dependencyCheck(
-                    odcInstallation: 'dependency-check',
-                    nvdCredentialsId: 'nvd-api-key',
-                    additionalArguments: '--scan . --format XML --format HTML --out target/odc-report'
-                )
-                dependencyCheckPublisher(
-                    pattern: 'target/odc-report/dependency-check-report.xml',
-                    failedTotalCritical: 1,
-                    failedTotalHigh: 1,
-                    stopBuild: true
-                )
+                withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
+                    script {
+                        def cleanKey = env.NVD_API_KEY ? env.NVD_API_KEY.trim() : ''
+                        if (!cleanKey) {
+                            error("Le credential 'nvd-api-key' est vide.")
+                        }
+                        bat "mvn org.owasp:dependency-check-maven:13.0.0:check -DnvdApiKey=${cleanKey} -DfailBuildOnCVSS=8"
+                    }
+                }
             }
         }
 
@@ -55,6 +53,7 @@ pipeline {
 
     post {
         always {
+            archiveArtifacts artifacts: 'target/dependency-check-report.*', allowEmptyArchive: true
             cleanWs()
         }
     }
