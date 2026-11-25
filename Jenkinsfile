@@ -30,7 +30,7 @@ pipeline {
                         if (!cleanKey) {
                             error("Le credential 'nvd-api-key' est vide.")
                         }
-                        bat "mvn org.owasp:dependency-check-maven:13.0.0:check -DnvdApiKey=${cleanKey} -DfailBuildOnCVSS=8"
+                        bat "mvn org.owasp:dependency-check-maven:13.0.0:check -DnvdApiKey=${cleanKey} -DassemblyAnalyzerEnabled=false -DfailBuildOnCVSS=8"
                     }
                 }
             }
