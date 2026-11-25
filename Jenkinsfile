@@ -24,7 +24,17 @@ pipeline {
 
         stage('OWASP Dependency-Check') {
             steps {
-                bat 'mvn org.owasp:dependency-check-maven:13.0.0:check -DfailBuildOnCVSS=8'
+                dependencyCheck(
+                    odcInstallation: 'dependency-check',
+                    nvdCredentialsId: 'nvd-api-key',
+                    additionalArguments: '--scan . --format XML --format HTML --out target/odc-report'
+                )
+                dependencyCheckPublisher(
+                    pattern: 'target/odc-report/dependency-check-report.xml',
+                    failedTotalCritical: 1,
+                    failedTotalHigh: 1,
+                    stopBuild: true
+                )
             }
         }
 
@@ -45,7 +55,6 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'target/dependency-check-report.*', allowEmptyArchive: true
             cleanWs()
         }
     }
